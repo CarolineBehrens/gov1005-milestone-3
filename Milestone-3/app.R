@@ -54,8 +54,8 @@ ui <- navbarPage(
              h3("About Me"),
              p("My name is Caroline Behrens and I study Economics. 
              You can reach me at Cbehrens@college.harvard.edu."),
-             p(tags$a(href-___)))
-    )
+             p(tags$a(href ="https://github.com/CarolineBehrens/gov1005-milestone-3.git"))))
+             
                          
 
 # Define server logic required to draw a histogram
