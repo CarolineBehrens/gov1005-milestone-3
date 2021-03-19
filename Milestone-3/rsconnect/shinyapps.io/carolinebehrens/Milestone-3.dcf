@@ -5,8 +5,8 @@ account: carolinebehrens
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3703942
-bundleId: 4275723
+bundleId: 4368945
 url: https://carolinebehrens.shinyapps.io/Milestone-3/
-when: 1614352585.51632
+when: 1616166495.94071
 asMultiple: FALSE
 asStatic: FALSE
