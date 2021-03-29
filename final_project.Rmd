@@ -17,7 +17,7 @@ View(crime_and_incarceration_by_state)
 ```
 ```{r}
 x %>%
-  filter(jurisdiction, year, violent_crime_total)
+  select(jurisdiction, year, violent_crime_total)
 ```
 ```{r}
 library(readr)
@@ -30,5 +30,12 @@ covid_prison_rates %>%
   arrange(desc(prisoner_cases_pct)) %>% 
   ggplot(aes(x = name, y = prisoner_cases_pct)) +
   geom_col()
+```
+
+```{r}
+crime_and_incarceration_by_state %>%
+  mutate(name = str_to_sentence(jurisdiction)) %>%
+inner_join(covid_prison_rates, by = "name") #%>%
+  #select(name, year, violent_crime_total, robbery, agg_assault, prisoner_cases_pct, prisoner_deaths_pct)
 ```
 
