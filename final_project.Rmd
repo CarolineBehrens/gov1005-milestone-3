@@ -31,11 +31,56 @@ covid_prison_rates %>%
   ggplot(aes(x = name, y = prisoner_cases_pct)) +
   geom_col()
 ```
-
 ```{r}
 crime_and_incarceration_by_state %>%
+  sample_n(10)
+```
+
+```{r}
+state_crime <- crime_and_incarceration_by_state %>%
+  sample_n(1000) %>%
   mutate(name = str_to_sentence(jurisdiction)) %>%
-inner_join(covid_prison_rates, by = "name") #%>%
-  #select(name, year, violent_crime_total, robbery, agg_assault, prisoner_cases_pct, prisoner_deaths_pct)
+inner_join(covid_prison_rates, by = "name") %>%
+  select(name, year, violent_crime_total,agg_assault, 
+murder_manslaughter, robbery, property_crime_total,
+larceny, vehicle_theft, prisoner_cases_pct, prisoner_deaths_pct) %>%
+  pivot_longer(names_to = "type",
+               values_to = "total",
+               cols = c(property_crime_total, violent_crime_total))
+  
+```
+
+```{r}
+plot_1 <- state_crime %>%
+ filter(name == input$Plot_type) %>%
+            ggplot(aes(x = year, y = total/1000, color = type)) +
+            geom_point(size = 5)
+
+plot_1
+  
+```
+
+
+```{r fit_1, cache=TRUE}
+fit_1 <- stan_glm(violent_crime_total ~ year,
+                    data = crime_and_incarceration_by_state, 
+                    seed = 17,
+                    refresh = 0)
+```
+
+```{r}
+vc_posterior <- fit_1 %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = year, fill = type)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                   alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior for Average Age",
+         subtitle = "More data allows for a more precise posterior for Democrats",
+         x = "Age",
+         y = "Probability") +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
 ```
 

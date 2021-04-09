@@ -10,7 +10,13 @@
 library(shiny)
 library(tidyverse)
 library(tidycensus)
-source("final_project.R")
+library(shinyWidgets)
+library(gtsummary)
+library(rstanarm)
+library(shinythemes)
+library(gt)
+source("map.R")q
+
 
 ui <- navbarPage(
     "Incarceration Numbers by State",
@@ -22,9 +28,10 @@ ui <- navbarPage(
                          selectInput(
                              "plot_type",
                              "Plot Type",
-                             c("Option A" = "a", "Option B" = "b")
+                             c(state_crime$name)
                          )),
-                     mainPanel(plotOutput("covid"))) 
+                     mainPanel(plotOutput("state_crime"),
+                               plotOutput("vc_posterior"))) 
              )),
     tabPanel("Discussion",
              titlePanel("Discussion Title"),
@@ -51,12 +58,40 @@ ui <- navbarPage(
              
                          
 
-# Define server logic required to draw a histogram
+#Define server logic required to draw a histogram
+
 server <- function(input, output){
-  output$covid <- renderPlot({
-   covid
+ output$state_crime <- renderPlot({ 
+ plot_1 <- state_crime %>%
+   filter(name == input$plot_type) %>%
+    ggplot(aes(x = year, y = total/1000, color = type)) +
+   geom_point(size = 5)
+  plot_1
 })
-}
+} 
+
+output$vc_posterior <- renderPlot({
+  fit_1 <- stan_glm(violent_crime_total ~ year,
+                    data = crime_and_incarceration_by_state, 
+                    seed = 17,
+                    refresh = 0)
+  
+  
+  vc_posterior <- fit_1 %>% 
+   as_tibble() %>% 
+    ggplot(aes(x = year, fill = type)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),
+                  alpha = 0.5, 
+                   bins = 100, 
+                   position = "identity") +
+    labs(title = "Posterior for Average Age",
+         subtitle = "More data allows for a more precise posterior for Democrats",
+         x = "Age",
+        y = "Probability") +
+    scale_y_continuous(labels = scales::percent_format()) +
+    theme_classic()
+})
+
 # Run the application 
 shinyApp(ui = ui, server = server)
 
